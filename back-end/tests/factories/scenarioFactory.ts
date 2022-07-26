@@ -12,6 +12,17 @@ export async function createScenarioWithOneRecommendation() {
   };
 }
 
+export async function createScenarioWithSomeRecommendations(quantity: number) {
+  const scenario = [];
+
+  for (let i = 0; i < quantity; i++) {
+    const recommendation = await createRecommendation();
+    scenario.push(recommendation);
+  }
+
+  return scenario;
+}
+
 export async function createScenarioWithOneRecommendationScore5() {
   const recommendation = await createRecommendationWithSomeScore(5);
 
