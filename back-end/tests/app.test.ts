@@ -7,7 +7,10 @@ import {
   createRecommendationData,
   createRecommendation,
 } from "./factories/recommendationFactory.js";
-import { createScenarioWithOneRecommendationScore5 } from "./factories/scenarioFactory.js";
+import {
+  createScenarioWithOneRecommendationScore5,
+  createScenarioWithOneRecommendationScore5Negative,
+} from "./factories/scenarioFactory.js";
 
 beforeEach(async () => {
   await prisma.$executeRaw`TRUNCATE TABLE recommendations`;
@@ -88,6 +91,23 @@ describe("downvote recommendation", () => {
     const response = await supertest(app).post(`/recommendations/1/downvote`);
 
     expect(response.status).toBe(404);
+  });
+
+  it("remove point and delete recommendation with score bellow -5", async () => {
+    const { recommendation } =
+      await createScenarioWithOneRecommendationScore5Negative();
+
+    const response = await supertest(app).post(
+      `/recommendations/${recommendation.id}/downvote`
+    );
+
+    expect(response.status).toBe(200);
+
+    const savedRecommendation = await prisma.recommendation.findFirst({
+      where: { name: recommendation.name },
+    });
+
+    expect(savedRecommendation).toBeNull();
   });
 });
 

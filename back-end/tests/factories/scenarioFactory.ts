@@ -19,3 +19,11 @@ export async function createScenarioWithOneRecommendationScore5() {
     recommendation,
   };
 }
+
+export async function createScenarioWithOneRecommendationScore5Negative() {
+  const recommendation = await createRecommendationWithSomeScore(-5);
+
+  return {
+    recommendation,
+  };
+}
