@@ -1,5 +1,8 @@
 import { prisma } from "./../../src/database.js";
-import { createRecommendation } from "./recommendationFactory.js";
+import {
+  createRecommendation,
+  createRecommendationWithSomeScore,
+} from "./recommendationFactory.js";
 
 export async function createScenarioWithOneRecommendation() {
   const recommendation = await createRecommendation();
@@ -9,9 +12,8 @@ export async function createScenarioWithOneRecommendation() {
   };
 }
 
-export async function createScenarioWithOneRecommendationWith5Points() {
-  const recommendation = await createRecommendation();
-  recommendation.score = 5;
+export async function createScenarioWithOneRecommendationScore5() {
+  const recommendation = await createRecommendationWithSomeScore(5);
 
   return {
     recommendation,
