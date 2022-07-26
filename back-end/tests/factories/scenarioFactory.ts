@@ -8,3 +8,12 @@ export async function createScenarioWithOneRecommendation() {
     recommendation,
   };
 }
+
+export async function createScenarioWithOneRecommendationWith5Points() {
+  const recommendation = await createRecommendation();
+  recommendation.score = 5;
+
+  return {
+    recommendation,
+  };
+}

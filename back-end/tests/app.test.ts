@@ -7,6 +7,7 @@ import {
   createRecommendationData,
   createRecommendation,
 } from "./factories/recommendationFactory.js";
+import { createScenarioWithOneRecommendationWith5Points } from "./factories/scenarioFactory.js";
 
 beforeEach(async () => {
   await prisma.$executeRaw`TRUNCATE TABLE recommendations`;
@@ -59,6 +60,33 @@ describe("upvote recommendation", () => {
 
   it("given invalid id, should return 404", async () => {
     const response = await supertest(app).post(`/recommendations/1/upvote`);
+
+    expect(response.status).toBe(404);
+  });
+});
+
+describe("downvote recommendation", () => {
+  it("remove point from recommendation", async () => {
+    const { recommendation } =
+      await createScenarioWithOneRecommendationWith5Points();
+    console.log(recommendation); // score: 5
+
+    const response = await supertest(app).post(
+      `/recommendations/${recommendation.id}/downvote`
+    );
+
+    expect(response.status).toBe(200);
+
+    const savedRecommendation = await prisma.recommendation.findFirst({
+      where: { name: recommendation.name },
+    });
+    console.log(savedRecommendation); // score: -1
+
+    expect(savedRecommendation.score).toBe(4); // TÁ RETORNANDO QUE savedRecommendation.score É -1
+  });
+
+  it("given invalid id, should return 404", async () => {
+    const response = await supertest(app).post(`/recommendations/1/downvote`);
 
     expect(response.status).toBe(404);
   });
