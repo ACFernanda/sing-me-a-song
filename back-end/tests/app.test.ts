@@ -3,7 +3,10 @@ import supertest from "supertest";
 
 import app from "./../src/app.js";
 import { prisma } from "../src/database.js";
-import createRecommendationData from "./factories/recommendationFactory.js";
+import {
+  createRecommendationData,
+  createRecommendation,
+} from "./factories/recommendationFactory.js";
 
 beforeEach(async () => {
   await prisma.$executeRaw`TRUNCATE TABLE recommendations`;
@@ -34,6 +37,30 @@ describe("post new recommendation", () => {
       .send(recommendationData);
 
     expect(response.status).toBe(422);
+  });
+});
+
+describe("upvote recommendation", () => {
+  it("add point to recommendation", async () => {
+    const recommendation = await createRecommendation();
+
+    const response = await supertest(app).post(
+      `/recommendations/${recommendation.id}/upvote`
+    );
+
+    expect(response.status).toBe(200);
+
+    const savedRecommendation = await prisma.recommendation.findFirst({
+      where: { name: recommendation.name },
+    });
+
+    expect(savedRecommendation.score).toBe(recommendation.score + 1);
+  });
+
+  it("given invalid id, should return 404", async () => {
+    const response = await supertest(app).post(`/recommendations/1/upvote`);
+
+    expect(response.status).toBe(404);
   });
 });
 
