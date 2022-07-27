@@ -124,6 +124,14 @@ describe("get recommendations", () => {
     expect(response.body.id).toBe(scenario[0].id);
   });
 
+  it("get random recommendation", async () => {
+    const scenario = await createScenarioWithSomeRecommendations(10);
+
+    const response = await supertest(app).get(`/recommendations/random`);
+
+    expect(response.body).toHaveProperty("name");
+  });
+
   it("get random with no recommendations register, should return 404", async () => {
     const response = await supertest(app).get(`/recommendations/random`);
 
