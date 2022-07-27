@@ -115,12 +115,14 @@ describe("downvote recommendation", () => {
 describe("get recommendations", () => {
   it("get last 10 recommendatios", async () => {
     const scenario = await createScenarioWithSomeRecommendations(11);
+    console.log(scenario);
 
     const response = await supertest(app).get(`/recommendations/`);
-
+    console.log(response.body);
     expect(response.body.length).toBe(10);
 
-    // FIXME: verificar como melhorar esse teste
+    expect(response.body[0].id).toEqual(scenario[10].id);
+    expect(response.body[9].id).toEqual(scenario[1].id);
   });
 
   it("get recommendation by id", async () => {
@@ -129,7 +131,6 @@ describe("get recommendations", () => {
     const response = await supertest(app).get(
       `/recommendations/${scenario[0].id}`
     );
-    console.log(response.body);
 
     expect(response.body.id).toBe(scenario[0].id);
   });
