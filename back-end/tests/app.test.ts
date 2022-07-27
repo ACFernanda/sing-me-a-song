@@ -20,6 +20,7 @@ beforeEach(async () => {
 describe("post new recommendation", () => {
   it("given valid schema, post new recommendation", async () => {
     const recommendationData = await createRecommendationData();
+    delete recommendationData.score;
     const response = await supertest(app)
       .post("/recommendations")
       .send(recommendationData);

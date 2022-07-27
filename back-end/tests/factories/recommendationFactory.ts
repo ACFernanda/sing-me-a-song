@@ -6,6 +6,7 @@ export async function createRecommendationData() {
   const recommendationData = {
     name: faker.music.songName(),
     youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+    score: faker.datatype.number({ min: -4, max: 20 }),
   };
 
   return recommendationData;

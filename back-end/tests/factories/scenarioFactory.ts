@@ -4,14 +4,6 @@ import {
   createRecommendationWithSomeScore,
 } from "./recommendationFactory.js";
 
-export async function createScenarioWithOneRecommendation() {
-  const recommendation = await createRecommendation();
-
-  return {
-    recommendation,
-  };
-}
-
 export async function createScenarioWithSomeRecommendations(quantity: number) {
   const scenario = [];
 
