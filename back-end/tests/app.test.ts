@@ -134,6 +134,12 @@ describe("get recommendations", () => {
     expect(response.body.id).toBe(scenario[0].id);
   });
 
+  it("given invalid id, returns 404", async () => {
+    const response = await supertest(app).get(`/recommendations/1`);
+
+    expect(response.status).toBe(404);
+  });
+
   it("get random recommendation", async () => {
     const scenario = await createScenarioWithSomeRecommendations(10);
 
