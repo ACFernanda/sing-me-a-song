@@ -127,6 +127,12 @@ describe("get recommendations", () => {
 
     expect(response.body.id).toBe(scenario[0].id);
   });
+
+  it("get random with no recommendations register, should return 404", async () => {
+    const response = await supertest(app).get(`/recommendations/random`);
+
+    expect(response.status).toBe(404);
+  });
 });
 
 afterAll(async () => {
