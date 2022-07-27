@@ -37,7 +37,6 @@ describe("post new recommendation", () => {
   it("given wrong schema, return 422", async () => {
     const recommendationData = await createRecommendationData();
     delete recommendationData.name;
-
     const response = await supertest(app)
       .post("/recommendations")
       .send(recommendationData);
@@ -50,7 +49,6 @@ describe("upvote recommendation", () => {
   it("add point to recommendation", async () => {
     const { recommendation } =
       await createScenarioWithOneRecommendationScore5();
-
     const response = await supertest(app).post(
       `/recommendations/${recommendation.id}/upvote`
     );
@@ -75,7 +73,6 @@ describe("downvote recommendation", () => {
   it("remove point from recommendation", async () => {
     const { recommendation } =
       await createScenarioWithOneRecommendationScore5();
-
     const response = await supertest(app).post(
       `/recommendations/${recommendation.id}/downvote`
     );
@@ -98,7 +95,6 @@ describe("downvote recommendation", () => {
   it("remove point and delete recommendation with score bellow -5", async () => {
     const { recommendation } =
       await createScenarioWithOneRecommendationScore5Negative();
-
     const response = await supertest(app).post(
       `/recommendations/${recommendation.id}/downvote`
     );
@@ -116,19 +112,15 @@ describe("downvote recommendation", () => {
 describe("get recommendations", () => {
   it("get last 10 recommendatios", async () => {
     const scenario = await createScenarioWithSomeRecommendations(11);
-    console.log(scenario);
-
     const response = await supertest(app).get(`/recommendations/`);
-    console.log(response.body);
-    expect(response.body.length).toBe(10);
 
+    expect(response.body.length).toBe(10);
     expect(response.body[0].id).toEqual(scenario[10].id);
     expect(response.body[9].id).toEqual(scenario[1].id);
   });
 
   it("get recommendation by id", async () => {
     const scenario = await createScenarioWithSomeRecommendations(1);
-
     const response = await supertest(app).get(
       `/recommendations/${scenario[0].id}`
     );
