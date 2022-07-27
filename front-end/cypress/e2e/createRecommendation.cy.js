@@ -25,4 +25,23 @@ describe("create recommendation", () => {
 
     cy.contains(`${recommendation.name}`).should("be.visible");
   });
+
+  it("should fail create recommendation", () => {
+    const recommendation = {
+      name: faker.lorem.words(3),
+      youtubeLink: "https://www.google.com",
+    };
+
+    cy.visit(`${URL}/`);
+    cy.get("#name").type(recommendation.name);
+    cy.get("#url").type(recommendation.youtubeLink);
+
+    cy.intercept("POST", "/recommendations").as("postRecommendation");
+    cy.get("#submit").click();
+    cy.wait("@postRecommendation");
+
+    cy.on("window:alert", (text) => {
+      expect(text).to.contains("Error creating recommendation!");
+    });
+  });
 });
