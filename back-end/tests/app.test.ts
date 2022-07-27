@@ -8,7 +8,6 @@ import {
   createRecommendation,
 } from "./factories/recommendationFactory.js";
 import {
-  createScenarioWithOneRecommendation,
   createScenarioWithOneRecommendationScore5,
   createScenarioWithOneRecommendationScore5Negative,
   createScenarioWithSomeRecommendations,
@@ -116,12 +115,23 @@ describe("downvote recommendation", () => {
 describe("get recommendations", () => {
   it("get last 10 recommendatios", async () => {
     const scenario = await createScenarioWithSomeRecommendations(11);
-    console.log(scenario);
+
     const response = await supertest(app).get(`/recommendations/`);
 
     expect(response.body.length).toBe(10);
 
-    // verificar como melhorar esse teste
+    // FIXME: verificar como melhorar esse teste
+  });
+
+  it("get recommendation by id", async () => {
+    const scenario = await createScenarioWithSomeRecommendations(1);
+
+    const response = await supertest(app).get(
+      `/recommendations/${scenario[0].id}`
+    );
+    console.log(response.body);
+
+    expect(response.body.id).toBe(scenario[0].id);
   });
 });
 
