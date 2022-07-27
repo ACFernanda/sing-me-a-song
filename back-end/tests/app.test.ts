@@ -3,10 +3,7 @@ import supertest from "supertest";
 
 import app from "./../src/app.js";
 import { prisma } from "../src/database.js";
-import {
-  createRecommendationData,
-  createRecommendation,
-} from "./factories/recommendationFactory.js";
+import { createRecommendationData } from "./factories/recommendationFactory.js";
 import {
   createScenarioWithOneRecommendationScore5,
   createScenarioWithOneRecommendationScore5Negative,
@@ -20,7 +17,6 @@ beforeEach(async () => {
 describe("post new recommendation", () => {
   it("given valid schema, post new recommendation", async () => {
     const recommendationData = await createRecommendationData();
-    delete recommendationData.score;
     const response = await supertest(app)
       .post("/recommendations")
       .send(recommendationData);
@@ -132,6 +128,19 @@ describe("get recommendations", () => {
     const response = await supertest(app).get(`/recommendations/random`);
 
     expect(response.status).toBe(404);
+  });
+
+  it("get top 3 recommendations", async () => {
+    const scenario = await createScenarioWithSomeRecommendations(6);
+    const response = await supertest(app).get(`/recommendations/top/3`);
+
+    expect(response.body.length).toBe(3);
+    expect(response.body[0].score).toBeGreaterThanOrEqual(
+      response.body[1].score
+    );
+    expect(response.body[1].score).toBeGreaterThanOrEqual(
+      response.body[2].score
+    );
   });
 });
 

@@ -1,14 +1,15 @@
+import { faker } from "@faker-js/faker";
+
 import { prisma } from "./../../src/database.js";
-import {
-  createRecommendation,
-  createRecommendationWithSomeScore,
-} from "./recommendationFactory.js";
+import { createRecommendationWithSomeScore } from "./recommendationFactory.js";
 
 export async function createScenarioWithSomeRecommendations(quantity: number) {
   const scenario = [];
 
   for (let i = 0; i < quantity; i++) {
-    const recommendation = await createRecommendation();
+    const recommendation = await createRecommendationWithSomeScore(
+      faker.datatype.number({ min: -4, max: 20 })
+    );
     scenario.push(recommendation);
   }
 
