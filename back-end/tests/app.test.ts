@@ -30,6 +30,16 @@ describe("post new recommendation", () => {
     expect(recommendationData.name).toBe(savedRecommendation.name);
   });
 
+  it("given same name, returns 409", async () => {
+    const recommendationData = await createRecommendationData();
+    await supertest(app).post("/recommendations").send(recommendationData);
+    const response = await supertest(app)
+      .post("/recommendations")
+      .send(recommendationData);
+
+    expect(response.status).toBe(409);
+  });
+
   it("given wrong schema, return 422", async () => {
     const recommendationData = await createRecommendationData();
     delete recommendationData.name;
