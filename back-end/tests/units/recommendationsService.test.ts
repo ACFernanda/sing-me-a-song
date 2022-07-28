@@ -2,7 +2,10 @@ import { jest } from "@jest/globals";
 
 import { recommendationService } from "../../src/services/recommendationsService.js";
 import { createRecommendationData } from "../factories/recommendationFactory.js";
-import { createScenarioWithOneRecommendationScore5 } from "../factories/scenarioFactory.js";
+import {
+  createScenarioWithOneRecommendationScore5,
+  createScenarioWithOneRecommendationScore5Negative,
+} from "../factories/scenarioFactory.js";
 import { recommendationRepository } from "../../src/repositories/recommendationRepository.js";
 import { conflictError, notFoundError } from "../../src/utils/errorUtils.js";
 
@@ -27,28 +30,54 @@ describe("insert recommendations", () => {
       conflictError("Recommendations names must be unique")
     );
   });
+});
 
-  describe("upvote recommendation", () => {
-    it("should add 1 point to recommendation score", async () => {
-      const scenario = await createScenarioWithOneRecommendationScore5();
+describe("upvote recommendation", () => {
+  it("should add 1 point to recommendation score", async () => {
+    const scenario = await createScenarioWithOneRecommendationScore5();
 
-      jest
-        .spyOn(recommendationRepository, "find")
-        .mockResolvedValueOnce(scenario.recommendation);
+    jest
+      .spyOn(recommendationRepository, "find")
+      .mockResolvedValueOnce(scenario.recommendation);
 
-      jest
-        .spyOn(recommendationRepository, "updateScore")
-        .mockResolvedValueOnce({ ...scenario.recommendation, score: 1 });
+    jest
+      .spyOn(recommendationRepository, "updateScore")
+      .mockResolvedValueOnce({ ...scenario.recommendation, score: 6 });
 
-      await recommendationService.upvote(scenario.recommendation.id);
-      expect(recommendationRepository.updateScore).toBeCalledTimes(1);
-    });
+    await recommendationService.upvote(scenario.recommendation.id);
+    expect(recommendationRepository.updateScore).toBeCalledTimes(1);
+  });
 
-    it("should fail add 1 point to recommendation score if id doesn't exist", async () => {
-      jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(null);
+  it("should fail add 1 point to recommendation score if id doesn't exist", async () => {
+    jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(null);
 
-      const result = recommendationService.upvote(100);
-      expect(result).rejects.toEqual(notFoundError());
-    });
+    const result = recommendationService.upvote(100);
+    expect(result).rejects.toEqual(notFoundError());
+  });
+});
+
+describe("downvote recommendation", () => {
+  it("should remove 1 point to recommendation and delete recommendation if score bellow -5", async () => {
+    const scenario = await createScenarioWithOneRecommendationScore5Negative();
+
+    jest
+      .spyOn(recommendationRepository, "find")
+      .mockResolvedValueOnce(scenario.recommendation);
+
+    jest
+      .spyOn(recommendationRepository, "updateScore")
+      .mockResolvedValueOnce({ ...scenario.recommendation, score: -6 });
+
+    jest.spyOn(recommendationRepository, "remove").mockResolvedValueOnce();
+
+    await recommendationService.downvote(scenario.recommendation.id);
+    expect(recommendationRepository.remove).toBeCalledTimes(1);
+  });
+
+  it("should fail remove 1 point to recommendation score if id doesn't exist", async () => {
+    jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(null);
+
+    const result = recommendationService.upvote(100);
+    expect(result).rejects.toEqual(notFoundError());
   });
 });
