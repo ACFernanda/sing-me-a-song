@@ -8,7 +8,7 @@ import { conflictError, notFoundError } from "../../src/utils/errorUtils.js";
 describe("insert recommendations", () => {
   it("should create recommendation", async () => {
     const recommendation = {
-      name: faker.lorem.words(3),
+      name: faker.lorem.words(4),
       youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
     };
     jest
@@ -31,8 +31,7 @@ describe("insert recommendations", () => {
       .spyOn(recommendationRepository, "findByName")
       .mockResolvedValueOnce({ id: 1, ...recommendation, score: 0 });
 
-    const result = recommendationService.insert(recommendation);
-    expect(result).rejects.toEqual(
+    expect(recommendationService.insert(recommendation)).rejects.toEqual(
       conflictError("Recommendations names must be unique")
     );
   });
@@ -62,8 +61,7 @@ describe("upvote recommendation", () => {
   it("should fail add 1 point to recommendation score if id doesn't exist", async () => {
     jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(null);
 
-    const result = recommendationService.upvote(100);
-    expect(result).rejects.toEqual(notFoundError());
+    expect(recommendationService.upvote(100)).rejects.toEqual(notFoundError());
   });
 });
 
@@ -93,8 +91,7 @@ describe("downvote recommendation", () => {
   it("should fail remove 1 point to recommendation score if id doesn't exist", async () => {
     jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(null);
 
-    const result = recommendationService.upvote(100);
-    expect(result).rejects.toEqual(notFoundError());
+    expect(recommendationService.upvote(100)).rejects.toEqual(notFoundError());
   });
 });
 
@@ -234,8 +231,11 @@ describe("get recommendations", () => {
   });
 
   it("fail get random - not found", async () => {
-    jest.spyOn(Math, "random").mockReturnValue(0.8);
-    jest.spyOn(recommendationRepository, "findAll").mockResolvedValueOnce([]);
+    const recommendation = [];
+    jest.spyOn(Math, "random").mockReturnValueOnce(0.9);
+    jest
+      .spyOn(recommendationRepository, "findAll")
+      .mockResolvedValueOnce(recommendation);
 
     return expect(recommendationService.getRandom()).rejects.toEqual(
       notFoundError()
@@ -247,9 +247,7 @@ describe("delete all", () => {
   it("delete all", async () => {
     const deleteAll = jest
       .spyOn(recommendationRepository, "deleteAll")
-      .mockResolvedValueOnce({
-        count: 0,
-      });
+      .mockReturnThis();
 
     await recommendationService.deleteAll();
     expect(deleteAll).toBeCalledTimes(1);
