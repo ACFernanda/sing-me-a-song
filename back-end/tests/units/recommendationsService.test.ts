@@ -152,7 +152,7 @@ describe("get recommendations", () => {
         score: 100,
       },
     ];
-    jest.spyOn(Math, "random").mockReturnValue(0.9);
+    jest.spyOn(Math, "random").mockReturnValueOnce(0.9);
     jest
       .spyOn(recommendationRepository, "findAll")
       .mockResolvedValueOnce([recommendations[0]]);
@@ -234,13 +234,10 @@ describe("get recommendations", () => {
   });
 
   it("fail get random - not found", async () => {
-    const recommendations = [];
     jest.spyOn(Math, "random").mockReturnValue(0.8);
-    jest
-      .spyOn(recommendationRepository, "findAll")
-      .mockResolvedValueOnce(recommendations);
+    jest.spyOn(recommendationRepository, "findAll").mockResolvedValueOnce([]);
 
-    expect(await recommendationService.getRandom()).rejects.toEqual(
+    return expect(recommendationService.getRandom()).rejects.toEqual(
       notFoundError()
     );
   });
