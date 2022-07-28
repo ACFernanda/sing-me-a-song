@@ -97,4 +97,13 @@ describe("get recommendations", () => {
     await recommendationService.get();
     expect(findAll).toBeCalledTimes(1);
   });
+
+  it("get top recommendations", async () => {
+    const getAmountByScore = jest
+      .spyOn(recommendationRepository, "getAmountByScore")
+      .mockResolvedValueOnce([]);
+
+    await recommendationService.getTop(0);
+    expect(getAmountByScore).toBeCalledTimes(1);
+  });
 });
