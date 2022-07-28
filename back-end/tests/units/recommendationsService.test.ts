@@ -1,14 +1,20 @@
 import { jest } from "@jest/globals";
 
+import { prisma } from "../../src/database.js";
 import { recommendationService } from "../../src/services/recommendationsService.js";
 import { createRecommendationData } from "../factories/recommendationFactory.js";
 import {
   createScenarioWithOneRecommendationScore5,
   createScenarioWithOneRecommendationScore5Negative,
   createScenarioWithSomeRecommendations,
+  createScenarioWithOneRecommendationScore100,
 } from "../factories/scenarioFactory.js";
 import { recommendationRepository } from "../../src/repositories/recommendationRepository.js";
 import { conflictError, notFoundError } from "../../src/utils/errorUtils.js";
+
+beforeEach(async () => {
+  await prisma.$executeRaw`TRUNCATE TABLE recommendations`;
+});
 
 describe("insert recommendations", () => {
   it("should create recommendation", async () => {
@@ -105,5 +111,18 @@ describe("get recommendations", () => {
 
     await recommendationService.getTop(0);
     expect(getAmountByScore).toBeCalledTimes(1);
+  });
+});
+
+describe("delete all", () => {
+  it("delete all", async () => {
+    const deleteAll = jest
+      .spyOn(recommendationRepository, "deleteAll")
+      .mockResolvedValueOnce({
+        count: 0,
+      });
+
+    await recommendationService.deleteAll();
+    expect(deleteAll).toBeCalledTimes(1);
   });
 });

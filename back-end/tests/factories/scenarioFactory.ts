@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 
-import { prisma } from "./../../src/database.js";
 import { createRecommendationWithSomeScore } from "./recommendationFactory.js";
 
 export async function createScenarioWithSomeRecommendations(quantity: number) {
@@ -18,6 +17,14 @@ export async function createScenarioWithSomeRecommendations(quantity: number) {
 
 export async function createScenarioWithOneRecommendationScore5() {
   const recommendation = await createRecommendationWithSomeScore(5);
+
+  return {
+    recommendation,
+  };
+}
+
+export async function createScenarioWithOneRecommendationScore100() {
+  const recommendation = await createRecommendationWithSomeScore(100);
 
   return {
     recommendation,
