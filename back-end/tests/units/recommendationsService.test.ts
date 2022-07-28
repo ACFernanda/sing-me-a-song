@@ -87,11 +87,14 @@ describe("downvote recommendation", () => {
   });
 });
 
-// describe("get recommendations", () => {
-//   it("get all recommendations", async () => {
-//     const recommendations = await createScenarioWithSomeRecommendations(10);
-//     jest
-//       .spyOn(recommendationRepository, "findAll")
-//       .mockResolvedValueOnce(recommendations);
-//   });
-// });
+describe("get recommendations", () => {
+  it("get all recommendations", async () => {
+    const recommendations = await createScenarioWithSomeRecommendations(10);
+    const findAll = jest
+      .spyOn(recommendationRepository, "findAll")
+      .mockResolvedValueOnce(recommendations);
+
+    await recommendationService.get();
+    expect(findAll).toBeCalledTimes(1);
+  });
+});
