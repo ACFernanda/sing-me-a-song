@@ -1,14 +1,14 @@
 import { faker } from "@faker-js/faker";
 import supertest from "supertest";
 
-import app from "./../src/app.js";
-import { prisma } from "../src/database.js";
-import { createRecommendationData } from "./factories/recommendationFactory.js";
+import app from "../../src/app.js";
+import { prisma } from "../../src/database.js";
+import { createRecommendationData } from "../factories/recommendationFactory.js";
 import {
   createScenarioWithOneRecommendationScore5,
   createScenarioWithOneRecommendationScore5Negative,
   createScenarioWithSomeRecommendations,
-} from "./factories/scenarioFactory.js";
+} from "../factories/scenarioFactory.js";
 
 beforeEach(async () => {
   await prisma.$executeRaw`TRUNCATE TABLE recommendations`;
