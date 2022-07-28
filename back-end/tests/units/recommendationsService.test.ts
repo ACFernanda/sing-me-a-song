@@ -5,6 +5,7 @@ import { createRecommendationData } from "../factories/recommendationFactory.js"
 import {
   createScenarioWithOneRecommendationScore5,
   createScenarioWithOneRecommendationScore5Negative,
+  createScenarioWithSomeRecommendations,
 } from "../factories/scenarioFactory.js";
 import { recommendationRepository } from "../../src/repositories/recommendationRepository.js";
 import { conflictError, notFoundError } from "../../src/utils/errorUtils.js";
@@ -12,6 +13,10 @@ import { conflictError, notFoundError } from "../../src/utils/errorUtils.js";
 describe("insert recommendations", () => {
   it("should create recommendation", async () => {
     const recommendation = await createRecommendationData();
+    jest
+      .spyOn(recommendationRepository, "findByName")
+      .mockResolvedValueOnce(null);
+
     jest.spyOn(recommendationRepository, "create").mockResolvedValueOnce();
 
     await recommendationService.insert(recommendation);
@@ -81,3 +86,12 @@ describe("downvote recommendation", () => {
     expect(result).rejects.toEqual(notFoundError());
   });
 });
+
+// describe("get recommendations", () => {
+//   it("get all recommendations", async () => {
+//     const recommendations = await createScenarioWithSomeRecommendations(10);
+//     jest
+//       .spyOn(recommendationRepository, "findAll")
+//       .mockResolvedValueOnce(recommendations);
+//   });
+// });
