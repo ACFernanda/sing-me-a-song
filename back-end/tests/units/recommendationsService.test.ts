@@ -1,24 +1,16 @@
 import { jest } from "@jest/globals";
+import { faker } from "@faker-js/faker";
 
-import { prisma } from "../../src/database.js";
 import { recommendationService } from "../../src/services/recommendationsService.js";
-import { createRecommendationData } from "../factories/recommendationFactory.js";
-import {
-  createScenarioWithOneRecommendationScore5,
-  createScenarioWithOneRecommendationScore5Negative,
-  createScenarioWithSomeRecommendations,
-  createScenarioWithOneRecommendationScore100,
-} from "../factories/scenarioFactory.js";
 import { recommendationRepository } from "../../src/repositories/recommendationRepository.js";
 import { conflictError, notFoundError } from "../../src/utils/errorUtils.js";
 
-beforeEach(async () => {
-  await prisma.$executeRaw`TRUNCATE TABLE recommendations`;
-});
-
 describe("insert recommendations", () => {
   it("should create recommendation", async () => {
-    const recommendation = await createRecommendationData();
+    const recommendation = {
+      name: faker.lorem.words(3),
+      youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+    };
     jest
       .spyOn(recommendationRepository, "findByName")
       .mockResolvedValueOnce(null);
@@ -30,7 +22,10 @@ describe("insert recommendations", () => {
   });
 
   it("should throw a conflict error if the name of the recommendation is not unique", async () => {
-    const recommendation = await createRecommendationData();
+    const recommendation = {
+      name: faker.lorem.words(3),
+      youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+    };
 
     jest
       .spyOn(recommendationRepository, "findByName")
@@ -45,17 +40,22 @@ describe("insert recommendations", () => {
 
 describe("upvote recommendation", () => {
   it("should add 1 point to recommendation score", async () => {
-    const scenario = await createScenarioWithOneRecommendationScore5();
+    const recommendation = {
+      id: 1,
+      name: faker.lorem.words(3),
+      youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+      score: 5,
+    };
 
     jest
       .spyOn(recommendationRepository, "find")
-      .mockResolvedValueOnce(scenario.recommendation);
+      .mockResolvedValueOnce(recommendation);
 
     jest
       .spyOn(recommendationRepository, "updateScore")
-      .mockResolvedValueOnce({ ...scenario.recommendation, score: 6 });
+      .mockResolvedValueOnce({ ...recommendation, score: 6 });
 
-    await recommendationService.upvote(scenario.recommendation.id);
+    await recommendationService.upvote(recommendation.id);
     expect(recommendationRepository.updateScore).toBeCalledTimes(1);
   });
 
@@ -69,19 +69,24 @@ describe("upvote recommendation", () => {
 
 describe("downvote recommendation", () => {
   it("should remove 1 point to recommendation and delete recommendation if score bellow -5", async () => {
-    const scenario = await createScenarioWithOneRecommendationScore5Negative();
+    const recommendation = {
+      id: 1,
+      name: faker.lorem.words(3),
+      youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+      score: -5,
+    };
 
     jest
       .spyOn(recommendationRepository, "find")
-      .mockResolvedValueOnce(scenario.recommendation);
+      .mockResolvedValueOnce(recommendation);
 
     jest
       .spyOn(recommendationRepository, "updateScore")
-      .mockResolvedValueOnce({ ...scenario.recommendation, score: -6 });
+      .mockResolvedValueOnce({ ...recommendation, score: -6 });
 
     jest.spyOn(recommendationRepository, "remove").mockResolvedValueOnce();
 
-    await recommendationService.downvote(scenario.recommendation.id);
+    await recommendationService.downvote(recommendation.id);
     expect(recommendationRepository.remove).toBeCalledTimes(1);
   });
 
@@ -95,7 +100,26 @@ describe("downvote recommendation", () => {
 
 describe("get recommendations", () => {
   it("get all recommendations", async () => {
-    const recommendations = await createScenarioWithSomeRecommendations(10);
+    const recommendations = [
+      {
+        id: 1,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 5,
+      },
+      {
+        id: 2,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 10,
+      },
+      {
+        id: 3,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 124,
+      },
+    ];
     const findAll = jest
       .spyOn(recommendationRepository, "findAll")
       .mockResolvedValueOnce(recommendations);
@@ -111,6 +135,114 @@ describe("get recommendations", () => {
 
     await recommendationService.getTop(0);
     expect(getAmountByScore).toBeCalledTimes(1);
+  });
+
+  it("get random recommendation - 30%", async () => {
+    const recommendations = [
+      {
+        id: 1,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 5,
+      },
+      {
+        id: 2,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 100,
+      },
+    ];
+    jest.spyOn(Math, "random").mockReturnValue(0.9);
+    jest
+      .spyOn(recommendationRepository, "findAll")
+      .mockResolvedValueOnce([recommendations[0]]);
+
+    const result = await recommendationService.getRandom();
+    expect(result.score).toEqual(recommendations[0].score);
+  });
+
+  it("get random recommendation - 70%", async () => {
+    const recommendations = [
+      {
+        id: 1,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 5,
+      },
+      {
+        id: 2,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 100,
+      },
+    ];
+    jest.spyOn(Math, "random").mockReturnValueOnce(0.5);
+    jest
+      .spyOn(recommendationRepository, "findAll")
+      .mockResolvedValueOnce([recommendations[1]]);
+
+    const result = await recommendationService.getRandom();
+    expect(result.score).toEqual(recommendations[1].score);
+  });
+
+  it("get random recommendation - 100% bellow/equal score 10", async () => {
+    const recommendations = [
+      {
+        id: 1,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 5,
+      },
+      {
+        id: 2,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 10,
+      },
+    ];
+    jest.spyOn(Math, "random").mockReturnValueOnce(0.5);
+    jest
+      .spyOn(recommendationRepository, "findAll")
+      .mockResolvedValueOnce(recommendations);
+
+    const result = await recommendationService.getRandom();
+    expect(result.score).toEqual(recommendations[1].score);
+  });
+
+  it("get random recommendation - 100% above score 10", async () => {
+    const recommendations = [
+      {
+        id: 1,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 100,
+      },
+      {
+        id: 2,
+        name: faker.lorem.words(3),
+        youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+        score: 200,
+      },
+    ];
+    jest.spyOn(Math, "random").mockReturnValueOnce(0.5);
+    jest
+      .spyOn(recommendationRepository, "findAll")
+      .mockResolvedValueOnce(recommendations);
+
+    const result = await recommendationService.getRandom();
+    expect(result.score).toEqual(recommendations[1].score);
+  });
+
+  it("fail get random - not found", async () => {
+    const recommendations = [];
+    jest.spyOn(Math, "random").mockReturnValue(0.8);
+    jest
+      .spyOn(recommendationRepository, "findAll")
+      .mockResolvedValueOnce(recommendations);
+
+    expect(await recommendationService.getRandom()).rejects.toEqual(
+      notFoundError()
+    );
   });
 });
 
