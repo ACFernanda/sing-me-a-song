@@ -241,7 +241,7 @@ describe("get recommendations", () => {
     jest.spyOn(Math, "random").mockReturnValueOnce(0.9);
     jest
       .spyOn(recommendationRepository, "findAll")
-      .mockResolvedValueOnce(recommendation);
+      .mockResolvedValue(recommendation);
 
     return expect(recommendationService.getRandom()).rejects.toEqual({
       type: "not_found",
