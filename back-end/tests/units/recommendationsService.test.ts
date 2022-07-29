@@ -3,7 +3,6 @@ import { faker } from "@faker-js/faker";
 
 import { recommendationService } from "../../src/services/recommendationsService.js";
 import { recommendationRepository } from "../../src/repositories/recommendationRepository.js";
-import { conflictError, notFoundError } from "../../src/utils/errorUtils.js";
 
 describe("insert recommendations", () => {
   it("should create recommendation", async () => {
@@ -31,9 +30,10 @@ describe("insert recommendations", () => {
       .spyOn(recommendationRepository, "findByName")
       .mockResolvedValueOnce({ id: 1, ...recommendation, score: 0 });
 
-    expect(recommendationService.insert(recommendation)).rejects.toEqual(
-      conflictError("Recommendations names must be unique")
-    );
+    expect(recommendationService.insert(recommendation)).rejects.toEqual({
+      type: "conflict",
+      message: "Recommendations names must be unique",
+    });
   });
 });
 
@@ -61,7 +61,10 @@ describe("upvote recommendation", () => {
   it("should fail add 1 point to recommendation score if id doesn't exist", async () => {
     jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(null);
 
-    expect(recommendationService.upvote(100)).rejects.toEqual(notFoundError());
+    expect(recommendationService.upvote(100)).rejects.toEqual({
+      type: "not_found",
+      message: "",
+    });
   });
 });
 
@@ -91,7 +94,10 @@ describe("downvote recommendation", () => {
   it("should fail remove 1 point to recommendation score if id doesn't exist", async () => {
     jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(null);
 
-    expect(recommendationService.upvote(100)).rejects.toEqual(notFoundError());
+    expect(recommendationService.upvote(100)).rejects.toEqual({
+      type: "not_found",
+      message: "",
+    });
   });
 });
 
@@ -237,9 +243,10 @@ describe("get recommendations", () => {
       .spyOn(recommendationRepository, "findAll")
       .mockResolvedValueOnce(recommendation);
 
-    return expect(recommendationService.getRandom()).rejects.toEqual(
-      notFoundError()
-    );
+    return expect(recommendationService.getRandom()).rejects.toEqual({
+      type: "not_found",
+      message: "",
+    });
   });
 });
 
