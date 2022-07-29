@@ -2,8 +2,6 @@
 
 import { faker } from "@faker-js/faker";
 
-const URL = "http://localhost:3000";
-
 beforeEach(() => {
   cy.resetRecommendations();
 });
@@ -55,6 +53,24 @@ describe("up/down vote recommendation", () => {
 
     cy.get("#score").should("contain.text", "-1");
   });
+
+  it("should remove recommendation when score bellow -5", () => {
+    const recommendation = {
+      name: faker.lorem.words(3),
+      youtubeLink: "https://www.youtube.com/watch?v=ckI-Se1NFd4",
+    };
+    cy.createRecommendation(recommendation);
+    cy.get("#downarrow").click();
+    cy.get("#downarrow").click();
+    cy.get("#downarrow").click();
+    cy.get("#downarrow").click();
+    cy.get("#downarrow").click();
+    cy.get("#downarrow").click();
+
+    cy.contains(`No recommendations yet! Create your own :)`).should(
+      "be.visible"
+    );
+  });
 });
 
 describe("get top recommendations", () => {
@@ -85,17 +101,20 @@ describe("get random recommendation", () => {
   });
 });
 
-describe("play video from recommendation", () => {
-  it("should play video when clicked", () => {
-    const recommendation = {
-      name: faker.lorem.words(3),
-      youtubeLink: "https://www.youtube.com/watch?v=ckI-Se1NFd4",
-    };
-    cy.createRecommendation(recommendation);
+// describe("play video from recommendation", () => {
+//   it("should play video when clicked", () => {
+//     const recommendation = {
+//       name: faker.lorem.words(3),
+//       youtubeLink: "https://www.youtube.com/watch?v=ckI-Se1NFd4",
+//     };
+//     cy.createRecommendation(recommendation);
 
-    cy.get(".ReactPlayer").click();
-  });
-});
+//     cy.get("#reactplayer.div").click();
+//     cy.get("#reactplayer")
+//       .should("have.prop", "paused", true)
+//       .and("have.prop", "ended", false);
+//   });
+// });
 
 afterEach(() => {
   cy.resetRecommendations();
