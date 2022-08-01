@@ -1,5 +1,3 @@
-import { faker } from "@faker-js/faker";
-
 const URL = "http://localhost:3000";
 
 Cypress.Commands.add("resetRecommendations", () => {

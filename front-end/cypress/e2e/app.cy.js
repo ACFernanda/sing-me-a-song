@@ -101,21 +101,6 @@ describe("get random recommendation", () => {
   });
 });
 
-// describe("play video from recommendation", () => {
-//   it("should play video when clicked", () => {
-//     const recommendation = {
-//       name: faker.lorem.words(3),
-//       youtubeLink: "https://www.youtube.com/watch?v=ckI-Se1NFd4",
-//     };
-//     cy.createRecommendation(recommendation);
-
-//     cy.get("#reactplayer.div").click();
-//     cy.get("#reactplayer")
-//       .should("have.prop", "paused", true)
-//       .and("have.prop", "ended", false);
-//   });
-// });
-
 afterEach(() => {
   cy.resetRecommendations();
 });
